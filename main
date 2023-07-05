@@ -1,0 +1,35 @@
+#!/usr/bin/env python3
+
+import sys
+import configparser as cp
+from core.sysaudio import sysAudio
+from core.usbaudio import usbAudio
+
+
+CONF: cp.ConfigParser = cp.ConfigParser()
+files = CONF.read("conf/sys.ini")
+if len(files) == 0:
+   sys.exit(1)
+
+def set_system() -> int:
+   try:
+      sys_audio: sysAudio = sysAudio(CONF)
+      sys_audio.set_default()
+      return 0
+   except Exception as e:
+      print(e)
+      return 1
+
+def main():
+   usb_audio: usbAudio = usbAudio("1a40:0201", "08bb:27c4", "08bb:2704")
+   rval: int = usb_audio.prob_usb_cards()
+   usb_audio.probe_sys_class_sound()
+   usb_audio.probe_proc_asound_cards()
+
+
+# -- entry point --
+if __name__ == "__main__":
+   if set_system() == 0:
+      main()
+   else:
+      print("UnableToSetSystem")
